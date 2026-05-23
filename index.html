@@ -2,25 +2,26 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mostrar cámara</title>
+  <title>Mostrar cámara trasera</title>
 </head>
 <body>
-  <h2>Vista de la cámara</h2>
+  <h2>Vista de la cámara (trasera en móvil)</h2>
   <video id="camara" width="640" height="480" autoplay playsinline></video>
 
   <script>
-    // Selecciona el elemento video
     const video = document.getElementById('camara');
 
-    // Solicita acceso a la cámara
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-      .then(stream => {
-        // Asigna el stream al elemento video
-        video.srcObject = stream;
-      })
-      .catch(error => {
-        console.error("Error al acceder a la cámara:", error);
-      });
+    // Solicita acceso a la cámara trasera en móviles
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: "environment" } }, 
+      audio: false
+    })
+    .then(stream => {
+      video.srcObject = stream;
+    })
+    .catch(error => {
+      console.error("Error al acceder a la cámara:", error);
+    });
   </script>
 </body>
 </html>
