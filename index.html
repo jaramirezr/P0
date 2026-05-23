@@ -2,26 +2,56 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mostrar cámara trasera</title>
+  <title>Cámara con modelo TensorFlow.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 </head>
 <body>
-  <h2>Vista de la cámara (trasera en móvil)</h2>
-  <video id="camara" width="640" height="480" autoplay playsinline></video>
+  <h2>Vista de la cámara (frontal)</h2>
+  <video id="camara" width="320" height="240" autoplay playsinline></video>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+  <button onclick="predecir()">Predecir</button>
 
   <script>
     const video = document.getElementById('camara');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let model;
 
-    // Solicita acceso a la cámara trasera en móviles
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { exact: "environment" } }, 
-      audio: false
-    })
-    .then(stream => {
-      video.srcObject = stream;
-    })
-    .catch(error => {
-      console.error("Error al acceder a la cámara:", error);
-    });
+    // 1. Mostrar cámara frontal
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(error => {
+        console.error("Error al acceder a la cámara:", error);
+      });
+
+    // 2. Cargar el modelo TensorFlow.js
+    async function cargarModelo() {
+      model = await tf.loadLayersModel('model.json'); // asegúrate que model.json esté en la misma carpeta
+      console.log("Modelo cargado");
+    }
+    cargarModelo();
+
+    // 3. Capturar un frame y pasarlo al modelo
+    async function predecir() {
+      if (!model) {
+        alert("El modelo aún no está cargado");
+        return;
+      }
+      // Dibujar el frame actual del video en el canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Obtener los píxeles como tensor
+      let imgTensor = tf.browser.fromPixels(canvas)
+        .resizeNearestNeighbor([100, 100]) // ajusta al tamaño esperado por tu modelo
+        .toFloat()
+        .div(255.0)                       // normalización [0,1]
+        .expandDims(0);                   // batch dimension
+
+      // Ejecutar predicción
+      const pred = model.predict(imgTensor);
+      pred.print(); // muestra resultado en consola
+    }
   </script>
 </body>
 </html>
