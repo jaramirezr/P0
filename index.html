@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mostrar cámara</title>
+</head>
+<body>
+  <h2>Vista de la cámara</h2>
+  <video id="camara" width="640" height="480" autoplay playsinline></video>
+
+  <script>
+    // Selecciona el elemento video
+    const video = document.getElementById('camara');
+
+    // Solicita acceso a la cámara
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(stream => {
+        // Asigna el stream al elemento video
+        video.srcObject = stream;
+      })
+      .catch(error => {
+        console.error("Error al acceder a la cámara:", error);
+      });
+  </script>
+</body>
+</html>
